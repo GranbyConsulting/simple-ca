@@ -1,0 +1,27 @@
+#!/bin/sh
+
+if [ $# -eq 1 ]
+then
+	rm -f certs/$1.*
+
+	tnow=`date +%s`
+
+	days=`expr \( 2147483647 - $tnow \) / 86400`
+
+	sed "s/_SAN_/$1/" csr.conf > $1.conf
+
+	openssl genrsa -out certs/$1.key 4096
+
+	openssl req -new -key certs/$1.key -out $1.csr -config $1.conf -subj "/CN=$1"
+
+	openssl x509 -req -in $1.csr \
+		-CA ca/ca.crt -CAkey ca/ca.key -CAcreateserial \
+		-days $days -extensions v3_req -extfile $1.conf \
+		-out certs/$1.crt
+
+	rm $1.csr
+
+	rm $1.conf
+else
+	echo 'usage: mkcert <name>'
+fi
