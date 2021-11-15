@@ -11,3 +11,7 @@ placed in the certs folder. No private key password will be applied. In order to
 the resulting certs, the ca.crt certificate in the ca folder must be trusted by the
 peer. For web severs, this means installing it as a trusted root authority on the PC,
 and for tunnels, it means specifying as the remote cert source. 
+
+If you need to creatr a wildcard certificate, you will have to provide both the wildcard
+host name and the cert name as seperate arguments. ./mkcert '*.mikeg.net' mikeg will
+create a certificate matching the specified pattern, storing it in files names mikeg.
