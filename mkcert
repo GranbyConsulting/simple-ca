@@ -1,27 +1,36 @@
 #!/bin/sh
 
-if [ $# -eq 1 ]
+if [ $# -eq 1 ] || [ $# -eq 2 ]
 then
-	rm -f certs/$1.*
+	if [ $# -eq 2 ]
+	then
+		host=$1
+		name=$2
+	else
+		host=$1
+		name=$1
+	fi
+
+	rm -f certs/$name.*
 
 	tnow=`date +%s`
 
 	days=`expr \( 2147483647 - $tnow \) / 86400`
 
-	sed "s/_SAN_/$1/" csr.conf > $1.conf
+	sed "s/_SAN_/$host/" csr.conf > $name.conf
 
-	openssl genrsa -out certs/$1.key 4096
+	openssl genrsa -out certs/$name.key 4096
 
-	openssl req -new -key certs/$1.key -out $1.csr -config $1.conf -subj "/CN=$1"
+	openssl req -new -key certs/$name.key -out $name.csr -config $name.conf -subj "/CN=$host"
 
-	openssl x509 -req -in $1.csr \
+	openssl x509 -req -in $name.csr \
 		-CA ca/ca.crt -CAkey ca/ca.key -CAcreateserial \
-		-days $days -extensions v3_req -extfile $1.conf \
-		-out certs/$1.crt
+		-days $days -extensions v3_req -extfile $name.conf \
+		-out certs/$name.crt
 
-	rm $1.csr
+	rm $name.csr
 
-	rm $1.conf
+	rm $name.conf
 else
-	echo 'usage: mkcert <name>'
+	echo 'usage: mkcert <host> [<name>]'
 fi
